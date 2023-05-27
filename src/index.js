@@ -18,7 +18,6 @@ const user_route = require("./routes/userRoutes");
 const role_route = require("./routes/roleRoutes");
 const order_route = require("./routes/orderRoutes");
 const order_product_route = require("./routes/orderproductRoutes");
-const payment_route = require("./routes/paymentRoutes");
 const product_route = require("./routes/productRoutes");
 // const product_size_route = require("./routes/productsizeRoutes");
 // const shipping_route = require("./routes/shippingRoutes");
