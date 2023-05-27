@@ -24,7 +24,7 @@ const product_route = require("./routes/productRoutes");
 // const shipping_route = require("./routes/shippingRoutes");
 // const brand_route = require("./routes/brandRoutes");
 // const category_route = require("./routes/categoryRoutes");
-const {addInitialProduct}=require('./helper/initial_product')
+const { addInitialProduct } = require('./helper/initial_product')
 const { googlePassport } = require("./auth/google");
 const Relation = require("./models/relation.model");
 
@@ -78,31 +78,31 @@ app.use((err, req, res, next) => {
   }
 });
 
-sequelize
-  .sync()
-  .then(async (result) => {
-    app.listen(port, () => {
-      const Role = require("./models/roleModel");
-      const populateDB = async () => {
-        const isAdmin = await Role.findOne({ where: { role: "admin" } });
-        if (!isAdmin) {
-          await Role.create({
-            role: "admin",
-          });
-        }
-        const isUser = await Role.findOne({ where: { role: "user" } });
-        if (!isUser) {
-          await Role.create({
-            role: "user",
-          });
-        }
-        return;
-      };
-      populateDB();
-      addInitialProduct();
-      console.log(`Listening on port ${port}`);
-    });
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+// sequelize
+//   .sync()
+//   .then(async (result) => {
+app.listen(port, () => {
+  const Role = require("./models/roleModel");
+  const populateDB = async () => {
+    const isAdmin = await Role.findOne({ where: { role: "admin" } });
+    if (!isAdmin) {
+      await Role.create({
+        role: "admin",
+      });
+    }
+    const isUser = await Role.findOne({ where: { role: "user" } });
+    if (!isUser) {
+      await Role.create({
+        role: "user",
+      });
+    }
+    return;
+  };
+  // populateDB();
+  // addInitialProduct();
+  console.log(`Listening on port ${port}`);
+});
+  // })
+  // .catch((error) => {
+  //   console.log(error);
+  // });
