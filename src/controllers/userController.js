@@ -400,31 +400,37 @@ exports.confirmEmail = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.checkAuth = async (req, res, next) => {
   try {
     const token = req.cookies.access_token;
     if (!token) {
-      handleError("please login", 403);
+      return res.status(403).json({ error: "Please login" });
     }
-    const user = await asyncVerify(token, process.env.ACCESS_TOKEN_SECRET)
-    if (user && user?.sub) {
-      const check_user = await User.findByPk(user?.sub)
-      if (!check_user?.isActive) {
-        handleError("This account is inactive, please contact our customer service", 403);
+    const user = await asyncVerify(token, process.env.ACCESS_TOKEN_SECRET);
+    if (user && user.sub) {
+      const check_user = await User.findByPk(user.sub);
+      if (!check_user || !check_user.isActive) {
+        return res.status(403).json({
+          error: "This account is inactive, please contact our customer service"
+        });
       }
       return res.json({
-        message: "success", auth: true, user:
-        {
-          ...user, affiliateLink: check_user?.affiliateLink,
-          appointment: check_user?.appointment
+        message: "success",
+        auth: true,
+        user: {
+          ...user,
+          affiliateLink: check_user.affiliateLink,
+          appointment: check_user.appointment
         }
       });
     }
-    handleError("please login", 403);
+    return res.status(403).json({ error: "Please login" });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
+
 
 exports.logOut = async (req, res, next) => {
   try {
