@@ -4,7 +4,7 @@ const sharp = require("sharp");
 const fs = require("fs");
 const path = require("path");
 const User = require("../models/userModel");
-const PaymenInfo = require("../models/paymentInfoModel")
+const PaymenInfo=require("../models/paymentInfoModel")
 const { removeEmptyPair } = require("../helper/reusable");
 const { getUser, getTreatmentType, getProductType, appointmentUnpaidExist } = require("../helper/user");
 exports.addProduct = async (req, res, next) => {
@@ -18,7 +18,7 @@ exports.addProduct = async (req, res, next) => {
       error.statusCode = 400;
       throw error;
     }
-    const new_product_info = removeEmptyPair(req.body)
+    const new_product_info=removeEmptyPair(req.body)
     const imgurl = [];
     if (req?.files?.length > 0) {
       if (!fs.existsSync("./images")) {
@@ -58,17 +58,17 @@ exports.getProduct = async (req, res, next) => {
       order: [["product_name", "ASC"]],
     };
     const id = req.user.sub;
-    const unpaid_appt_exist = await appointmentUnpaidExist(id)
-    if (unpaid_appt_exist) {
+    const unpaid_appt_exist=await appointmentUnpaidExist(id)
+    if(unpaid_appt_exist){
       return res.redirect('/appointment')
     }
-    const paymentInfo = await PaymenInfo.findAll({ where: { userId: id } })
+    const paymentInfo=await PaymenInfo.findAll({where:{userId:id}})
     const user = await getUser(id);
     let products;
-    if (user.appointment) {
+    if(user.appointment){
       products = await getTreatmentType(options)
     }
-    else {
+    else{
       products = await getProductType(options)
     }
     const priceArr = [];
@@ -77,18 +77,18 @@ exports.getProduct = async (req, res, next) => {
     products.total = totalPrice;
     const token = req.cookies.access_token;
 
-    const billing_info = {
-      firstName: user.first_name,
-      lastName: user.last_name,
-      email: user.email,
-      address: user.address,
-      city: user.city,
-      zipCode: user.zip_code,
-      state: user.state
+    const billing_info={
+      firstName:user.first_name,
+      lastName:user.last_name,
+      email:user.email,
+      address:user.address,
+      city:user.city,
+      zipCode:user.zip_code,
+      state:user.state
     }
     return res.render(
       path.join(__dirname, "..", "/views/pages/shop-checkout"),
-      { products, billing_info, token, paymentInfo }
+      { products,billing_info,token,paymentInfo}
     );
   } catch (err) {
     next(err);
@@ -109,7 +109,7 @@ exports.editProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
     const addImage = {};
-    const update_product_info = removeEmptyPair(req.body)
+    const update_product_info=removeEmptyPair(req.body)
     if (req.mimetypeError) {
       const error = new Error(req.mimetypeError);
       error.statusCode = 400;

@@ -27,11 +27,11 @@ const {
 } = require("../helper/user");
 const { handleError } = require("../helper/handleError");
 const { validationResult } = require("express-validator");
-const { sendEmail, sendOtpEmail, sendAffiliatePaidEmail } = require("../helper/send_email");
+const { sendEmail ,sendOtpEmail, sendAffiliatePaidEmail} = require("../helper/send_email");
 const { removeEmptyPair } = require("../helper/reusable");
 const { sendPayout } = require("../functions/paypal");
 const Affiliate = require("../models/affiliateModel");
-const filePath = path.join(__dirname, "..", "..", 'public', 'images', 'testrxmd.gif');
+const filePath = path.join(__dirname,"..","..",'public', 'images','testrxmd.gif');
 exports.registerUser = async (req, res, next) => {
 
   const errors = validationResult(req);
@@ -39,8 +39,8 @@ exports.registerUser = async (req, res, next) => {
     return res.status(400).json({ message: errors.array()[0].msg });
   }
   try {
-    const { first_name, last_name, email, password } = req.body;
-    const { affiliatedBy } = req.query;
+    const { first_name, last_name, email, password} = req.body;
+    const {affiliatedBy}=req.query;
     const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET);
     const mailOptions = {
       from: process.env.EMAIL,
@@ -60,11 +60,11 @@ exports.registerUser = async (req, res, next) => {
       </div>
       </div>
     `,
-      attachments: [{
-        filename: 'testrxmd.gif',
-        path: filePath,
-        cid: 'unique@kreata.ae' //same cid value as in the html img src
-      }]
+    attachments: [{
+      filename: 'testrxmd.gif',
+      path: filePath,
+      cid: 'unique@kreata.ae' //same cid value as in the html img src
+    }]
     };
     if (await isEmailExist(email)) {
       if (await isEmailVerified(email)) {
@@ -86,9 +86,9 @@ exports.registerUser = async (req, res, next) => {
     }
     const user_role = await Role.findOne({ where: { role: "user" } });
     const hashedPassword = await hashPassword(password);
-    let affiliating_user = null
-    if (affiliatedBy) {
-      affiliating_user = await User.findOne({ where: { affiliateLink: affiliatedBy } })
+    let affiliating_user=null
+    if(affiliatedBy){
+      affiliating_user=await User.findOne({where:{affiliateLink:affiliatedBy}})
     }
     //affiliatedBy:userId
     const user = new User({
@@ -98,11 +98,11 @@ exports.registerUser = async (req, res, next) => {
       roleId: user_role.id,
       password: hashedPassword,
       isLocalAuth: true,
-      affiliatedBy: affiliating_user?.id
+      affiliatedBy:affiliating_user?.id
     });
     await user.save();
     //create client on the vcita
-
+    
     await sendEmail(mailOptions);
     return res.json({ success: true });
   } catch (err) {
@@ -142,12 +142,12 @@ exports.loginUser = async (req, res, next) => {
           </div>
           </div>
         `,
-          attachments: [{
-            filename: 'testrxmd.gif',
-            path: filePath,
-            cid: 'unique@kreata.be' //same cid value as in the html img src
-          }]
-
+        attachments: [{
+          filename: 'testrxmd.gif',
+          path: filePath,
+          cid: 'unique@kreata.be' //same cid value as in the html img src
+        }]
+          
         };
         await sendEmail(mailOptions);
         handleError(
@@ -156,8 +156,8 @@ exports.loginUser = async (req, res, next) => {
         );
       }
       if (await isPasswordCorrect(login_password, user.password)) {
-
-        const access_token = rememberme
+        
+          const access_token = rememberme
           ? await issueToken(
             user.id,
             user.role?.role,
@@ -167,12 +167,12 @@ exports.loginUser = async (req, res, next) => {
             process.env.LONG_ACCESS_TOKEN_EXPIRY
           )
           : await issueToken(
-            user.id,
-            user.role.role,
-            login_email,
-            rememberme,
-            process.env.ACCESS_TOKEN_SECRET,
-            process.env.ACCESS_TOKEN_EXPIRES);
+             user.id, 
+             user.role.role,
+             login_email,
+             rememberme,
+             process.env.ACCESS_TOKEN_SECRET,
+             process.env.ACCESS_TOKEN_EXPIRES);
 
         const info = {
           first_name: user.first_name,
@@ -181,22 +181,22 @@ exports.loginUser = async (req, res, next) => {
           email: user.email,
         };
         bouncer.reset(req);
-        const token_expiry = rememberme ?
-          process.env.LONG_ACCESS_TOKEN_EXPIRY :
-          process.env.ACCESS_TOKEN_EXPIRES
+        const token_expiry=rememberme?
+        process.env.LONG_ACCESS_TOKEN_EXPIRY:
+        process.env.ACCESS_TOKEN_EXPIRES
         const currentDate = new Date();
-        console.log(token_expiry, rememberme)
-        const cookie_expires = moment(currentDate).add(token_expiry.match(/^(\d+)/)[1], 'days').toDate();
-        res.cookie('access_token', access_token, {
+        console.log(token_expiry,rememberme)
+        const cookie_expires = moment(currentDate).add(token_expiry.match(/^(\d+)/)[1],'days').toDate();
+        res.cookie('access_token',access_token, {
           path: "/",
-          httpOnly: true,
-          expires: cookie_expires,
+          httpOnly:true,
+          expires:cookie_expires,
           // secure: true,
         })
-
+      
         return res
           .status(200)
-          .json({ auth: true, info, intakeFilled: user.intake });
+          .json({ auth: true, info, intakeFilled:user.intake });
       }
       handleError("Username or Password Incorrect", 400);
     }
@@ -300,7 +300,7 @@ exports.changePassword = async (req, res, next) => {
     if (!user) {
       handleError("user not found", 403);
     }
-    if (!user.isLocalAuth) {
+    if(!user.isLocalAuth){
       handleError("This account uses google authentication.", 403);
     }
     const { old_password, new_password } = req.body;
@@ -321,9 +321,9 @@ exports.changePassword = async (req, res, next) => {
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ where: { email: email } })
-    if (!user || !user.isLocalAuth || !user.isEmailConfirmed) {
-      handleError("User With this email not found to reset the password", 403)
+    const user =await User.findOne({where:{email:email}})
+    if(!user||!user.isLocalAuth||!user.isEmailConfirmed){
+      handleError("User With this email not found to reset the password",403)
     }
     const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: "2h",
@@ -346,11 +346,11 @@ exports.forgotPassword = async (req, res, next) => {
       </div>
       </div>
     `,
-      attachments: [{
-        filename: 'testrxmd.gif',
-        path: filePath,
-        cid: 'unique@kreata.be' //same cid value as in the html img src
-      }]
+    attachments: [{
+      filename: 'testrxmd.gif',
+      path: filePath,
+      cid: 'unique@kreata.be' //same cid value as in the html img src
+    }]
     };
     await sendEmail(mailOptions);
     return res.json({
@@ -367,10 +367,10 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const { token } = req.query;
     const { password } = req.body;
-    const user = await isTokenValid(token, process.env.ACCESS_TOKEN_SECRET);
-    const user_info = await User.findOne({ where: { email: user.email } })
-    if (!user_info || !user_info.isLocalAuth || !user_info.isEmailConfirmed) {
-      handleError("User With this email not found to reset the password", 403)
+    const user = await isTokenValid(token,process.env.ACCESS_TOKEN_SECRET);
+    const user_info =await User.findOne({where:{email:user.email}})
+    if(!user_info||!user_info.isLocalAuth||!user_info.isEmailConfirmed){
+      handleError("User With this email not found to reset the password",403)
     }
     const hashedPassword = await hashPassword(password);
     await User.update(
@@ -388,7 +388,7 @@ exports.resetPassword = async (req, res, next) => {
 exports.confirmEmail = async (req, res, next) => {
   try {
     const { verifyToken } = req.query;
-    const user = await isTokenValid(verifyToken, process.env.ACCESS_TOKEN_SECRET);
+    const user = await isTokenValid(verifyToken,process.env.ACCESS_TOKEN_SECRET);
     if (user) {
       const userInfo = await User.findOne({ where: { email: user.email } });
       userInfo.isEmailConfirmed = true;
@@ -400,37 +400,27 @@ exports.confirmEmail = async (req, res, next) => {
     next(err);
   }
 };
-
 exports.checkAuth = async (req, res, next) => {
   try {
     const token = req.cookies.access_token;
     if (!token) {
-      return res.status(403).json({ error: "Please login" });
+      handleError("please login", 403);
     }
-    const user = await asyncVerify(token, process.env.ACCESS_TOKEN_SECRET);
-    if (user && user.sub) {
-      const check_user = await User.findByPk(user.sub);
-      if (!check_user || !check_user.isActive) {
-        return res.status(403).json({
-          error: "This account is inactive, please contact our customer service"
-        });
+    const user = await asyncVerify(token, process.env.ACCESS_TOKEN_SECRET)
+    if (user && user?.sub) {
+      const check_user = await User.findByPk(user?.sub)
+      if (!check_user?.isActive) {
+        handleError("This account is inactive, please contact our customer service", 403);
       }
-      return res.json({
-        message: "success",
-        auth: true,
-        user: {
-          ...user,
-          affiliateLink: check_user.affiliateLink,
-          appointment: check_user.appointment
-        }
-      });
+      return res.json({ message: "success", auth: true, user: 
+      {...user,affiliateLink:check_user?.affiliateLink,
+        appointment:check_user?.appointment} });
     }
-    return res.status(403).json({ error: "Please login" });
+    handleError("please login", 403);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 };
-
 
 exports.logOut = async (req, res, next) => {
   try {
@@ -470,11 +460,11 @@ exports.contactFormEmail = async (req, res, next) => {
       </div>
       </div>
     `,
-      attachments: [{
-        filename: 'testrxmd.gif',
-        path: filePath,
-        cid: 'unique@kreata.ae' //same cid value as in the html img src
-      }]
+    attachments: [{
+      filename: 'testrxmd.gif',
+      path: filePath,
+      cid: 'unique@kreata.ae' //same cid value as in the html img src
+    }]
     };
     await sendEmail(receiveOptions);
     //send automatic reply email
@@ -495,11 +485,11 @@ exports.contactFormEmail = async (req, res, next) => {
       </div>
       </div>
     `,
-      attachments: [{
-        filename: 'testrxmd.gif',
-        path: filePath,
-        cid: 'unique@kreata.ae' //same cid value as in the html img src
-      }]
+    attachments: [{
+      filename: 'testrxmd.gif',
+      path: filePath,
+      cid: 'unique@kreata.ae' //same cid value as in the html img src
+    }]
     };
     await sendEmail(replyOptions);
     return res.json({
@@ -514,155 +504,154 @@ exports.contactFormEmail = async (req, res, next) => {
 
 exports.getAvailableProvider = async (req, res, next) => {
   try {
-    //  const userTimezone =req.query.userTimezone
-    //  const userDateTime = moment.tz(appointmentDateTime,userTimezone).utc();
-    //  momentZone.tz(appointmentDateTime, userTimezone);
-    //  const utcDateTime = moment.utc(appointmentDateTime);
-    const providers = await getProviders()
-    console.log(req.user)
-    const appt = await appointmentUnpaidExist(req?.user?.sub, {
-      doctorId: { [Op.not]: null }
-    })
+  //  const userTimezone =req.query.userTimezone
+  //  const userDateTime = moment.tz(appointmentDateTime,userTimezone).utc();
+  //  momentZone.tz(appointmentDateTime, userTimezone);
+  //  const utcDateTime = moment.utc(appointmentDateTime);
+   const providers=await getProviders()
+   console.log(req.user)
+   const appt=await appointmentUnpaidExist(req?.user?.sub,{
+    doctorId:{[Op.not]: null}
+   })
 
-    //  const free_provider=[]
-    //  //give two hour before and after appointment
-    // //  const appointmentStartTime = userDateTime.clone().toDate();
-    // //  const twoHoursAfter = userDateTime.clone().add(1, "hours").toDate();
-    // if(providers.length<1) return res.json(free_provider)
-    // for(let provider of providers){
-    //   const options={
-    //     where: {
-    //       doctorId: provider.id,
-    //       // appointmentDateTime: {
-    //       //   [Op.between]: [appointmentStartTime, twoHoursAfter]
-    //       // },
-    //     },
-    //   }
-    //   const overlappingAppointments = await getAppointmentsByFilter(options);
-    //   if(overlappingAppointments.length<1)free_provider.push(
-    //     {id:provider.id,first_name:provider.first_name,
-    //     last_name:provider.last_name})
-    // }
-    return res.json({ providers, appt })
+  //  const free_provider=[]
+  //  //give two hour before and after appointment
+  // //  const appointmentStartTime = userDateTime.clone().toDate();
+  // //  const twoHoursAfter = userDateTime.clone().add(1, "hours").toDate();
+  // if(providers.length<1) return res.json(free_provider)
+  // for(let provider of providers){
+  //   const options={
+  //     where: {
+  //       doctorId: provider.id,
+  //       // appointmentDateTime: {
+  //       //   [Op.between]: [appointmentStartTime, twoHoursAfter]
+  //       // },
+  //     },
+  //   }
+  //   const overlappingAppointments = await getAppointmentsByFilter(options);
+  //   if(overlappingAppointments.length<1)free_provider.push(
+  //     {id:provider.id,first_name:provider.first_name,
+  //     last_name:provider.last_name})
+  // }
+   return res.json({providers,appt})
   }
-  catch (err) {
-    next(err)
+  catch(err){
+   next(err)
   }
 }
 exports.getProviderSchedule = async (req, res, next) => {
   try {
-    const providerId = req.params.providerId;
-    const options = {
-      where: {
-        doctorId: providerId,
-        paymentStatus: true
-      },
-      attributes: ['appointmentDateTime']
-    }
-    const providerSchedule = await getAppointmentsByFilter(options);
-    return res.json({ providerSchedule })
+   const providerId = req.params.providerId;
+   const options={
+    where:{
+      doctorId: providerId,
+      paymentStatus:true
+    },
+    attributes:['appointmentDateTime']
+   }
+   const providerSchedule = await getAppointmentsByFilter(options);
+   return res.json({providerSchedule})
   }
-  catch (err) {
-    next(err)
+  catch(err){
+   next(err)
   }
 }
 
 exports.getAffilateCode = async (req, res, next) => {
   try {
-    const user = await User.findOne({ where: { id: req?.user?.sub } });
-    if (user.affiliateLink) {
-      const dataUrl = await QRCode.toDataURL(`${process.env.BASE_URL}/register?affiliatedBy=${user.affiliateLink}`)
-      return res.json({ src: dataUrl, url: `${process.env.BASE_URL}/register?affiliatedBy=${user.affiliateLink}` });
+    const user=await User.findOne({where:{id:req?.user?.sub}});
+    if(user.affiliateLink){
+      const dataUrl=await QRCode.toDataURL(`${process.env.BASE_URL}/register?affiliatedBy=${user.affiliateLink}`)
+      return res.json({src:dataUrl,url:`${process.env.BASE_URL}/register?affiliatedBy=${user.affiliateLink}`});
     }
-    const link = Date.now()
-    await User.update({ affiliateLink: link },
-      { where: { id: req?.user?.sub } });
-    const dataUrl = await QRCode.toDataURL(`${process.env.BASE_URL}/register?affiliatedBy=${link}`)
-    return res.json({ src: dataUrl, url: `${process.env.BASE_URL}/register?affiliatedBy=${user.affiliateLink}` });
+    const link=Date.now()
+    await User.update({affiliateLink:link},
+    {where:{id:req?.user?.sub}});
+    const dataUrl=await QRCode.toDataURL(`${process.env.BASE_URL}/register?affiliatedBy=${link}`)
+    return res.json({src:dataUrl,url:`${process.env.BASE_URL}/register?affiliatedBy=${user.affiliateLink}`});
   }
-  catch (err) {
-    next(err)
+  catch(err){
+   next(err)
   }
 }
 exports.getOtp = async (req, res, next) => {
   try {
-    const amount = await getAffiliatePayableAmount(req?.user?.sub)
-    if (Number(amount) < 20) {
-      handleError("not enough balance to withdraw", 401)
+    const amount =await getAffiliatePayableAmount(req?.user?.sub)
+    if(Number(amount)<20){
+    handleError("not enough balance to withdraw",401)
     }
-    const otp = await generateOtp(req?.user?.sub)
-    const user = await User.findByPk(req?.user?.sub)
-    await sendOtpEmail(otp, user.email)
-    return res.json({ otp });
+   const otp =await generateOtp(req?.user?.sub)
+   const user=await User.findByPk(req?.user?.sub)
+   await sendOtpEmail(otp,user.email)
+   return res.json({otp});
   }
-  catch (err) {
-    next(err)
+  catch(err){
+   next(err)
   }
 }
 exports.confirmOtp = async (req, res, next) => {
   try {
-    const otp = req.body.otp
-    const valid = await verify2faVerfication(otp, req?.user?.sub)
-    const user = await User.findOne({ where: { id: req?.user?.sub } });
-    if (valid) {
-      let amount = await getAffiliatePayableAmount(req?.user?.sub)
-      //cash-out just 70% of the reward
-      amount = Number(amount) * 0.7
-      if (amount < 20) {
-        handleError("not enough balane to withdraw", 401)
-      }
-      const batchId = Math.random().toString(36).substring(9)
-      const note = 'TestRxmd affiliate payout'
-      const payout = await sendPayout(user.email, amount, note, batchId)
-      await Affiliate.update({ batchId: payout?.batch_header?.payout_batch_id, status: "pending" },
-        { where: { affilatorId: req?.user?.sub, withdrawalType: "NA" } })
-      return res.json({ message: "payout success, will let you know with email when transaction done" });
+    const otp=req.body.otp
+    const valid= await verify2faVerfication(otp,req?.user?.sub)
+    const user=await User.findOne({where:{id:req?.user?.sub}});
+   if(valid){
+   let amount =await getAffiliatePayableAmount(req?.user?.sub)
+   //cash-out just 70% of the reward
+   amount=Number(amount)*0.7
+   if(amount<20){
+    handleError("not enough balane to withdraw",401)
     }
-    handleError("Invalid code, please try again", 403)
+   const batchId=Math.random().toString(36).substring(9)
+   const note='TestRxmd affiliate payout'
+   const payout=await sendPayout(user.email,amount,note,batchId)
+   await Affiliate.update({batchId:payout?.batch_header?.payout_batch_id,status:"pending"},
+    {where:{affilatorId:req?.user?.sub,withdrawalType:"NA"}})
+    return res.json({message:"payout success, will let you know with email when transaction done"});
+   }
+   handleError("Invalid code, please try again",403)
   }
-  catch (err) {
-    next(err)
+  catch(err){
+   next(err)
   }
 }
 exports.getUserAffiliateDetail = async (req, res, next) => {
   try {
-    const affilate_detail = await Affiliate.findAll({
-      where: { affilatorId: req?.user?.sub },
-      include: ['buyer']
-    })
-    return res.json({ affilate_detail })
+    const affilate_detail=await Affiliate.findAll({where:{affilatorId:req?.user?.sub},
+      include:['buyer']})
+    return res.json({affilate_detail})
   }
-  catch (err) {
-    next(err)
+  catch(err){
+   next(err)
   }
 }
 //change in dev
 exports.create2FA = async (req, res, next) => {
   try {
-    const Otp = await get2faVerfication(1)
-    sendOtpEmail(Otp, "marufbelete9@gmail.com")
+    const Otp=await get2faVerfication(1)
+    sendOtpEmail(Otp,"marufbelete9@gmail.com")
     return res.json('success')
   }
-  catch (err) {
-    next(err)
+  catch(err){
+   next(err)
   }
 }
 //change in dev
 exports.verify2FA = async (req, res, next) => {
   try {
-    const verify = await verify2faVerfication("066876", 1)
-    if (!verify) {
-      handleError("Wrong OTP please try again", 403)
+    const verify=await verify2faVerfication("066876",1)
+    if(!verify){
+      handleError("Wrong OTP please try again",403)
     }
-    if (verify.delta === 0) {
-      return res.json({ message: "successfully verified" })
+    if(verify.delta===0)
+    {
+      return res.json({message:"successfully verified"})
     }
-    else if (verify.delta <= -1) {
-      handleError("OTP key entered too late", 403)
+    else if(verify.delta<=-1){
+      handleError("OTP key entered too late",403)
     }
   }
-  catch (err) {
-    next(err)
+  catch(err){
+   next(err)
   }
 }
 
@@ -672,10 +661,10 @@ exports.adminDashboard = async (req, res, next) => {
       order: [["product_name", "ASC"]],
     };
     const products = await Product.findAll(options);
-    const product_type = await Product.getAttributes().type.values;
-    const product_catagory = await Product.getAttributes().productCatagory.values;
+    const product_type=await Product.getAttributes().type.values;
+    const product_catagory=await Product.getAttributes().productCatagory.values;
     return res.render(path.join(__dirname, "..", "/views/pages/dashboard"),
-      { products, product_type, product_catagory });
+     { products,product_type,product_catagory });
   } catch (err) {
     next(err);
   }
@@ -688,7 +677,7 @@ exports.jotformWebhook = async (req, res, next) => {
     const jot_entries = jot_pairs.map((kv) => kv.split(":"));
     const jot_obj = Object.fromEntries(jot_entries);
     const token = jot_obj.token;
-    const user = await isTokenValid(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await isTokenValid(token,process.env.ACCESS_TOKEN_SECRET);
     await User.update(
       { intake: true },
       {

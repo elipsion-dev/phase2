@@ -43,7 +43,7 @@ exports.getOrderproductById = async (req, res, next) => {
 exports.editOrderproduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { quantity } = req.body
+    const {quantity}=req.body
     if (isUserAdmin(req)) {
       const updated_order_product = await Orderproduct.update(
         { quantity },

@@ -24,7 +24,7 @@
   <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
   <link href="css/animate.min.css" rel="stylesheet" type="text/css">
   <link href="css/javascript-plugins-bundle.css" rel="stylesheet" />
-  <script src="https://www.google.com/recaptcha/api.js"></script>
+  <!-- <script src="https://www.google.com/recaptcha/api.js"></script> -->
 
   <!-- CSS | menuzord megamenu skins -->
   <link href="js/menuzord/css/menuzord.css" rel="stylesheet" />
@@ -82,6 +82,9 @@
       <a href="/checkout">Telehealth &amp; Labs</a>
     </li>
     <li class="menu-item">
+      <a id="account_page" class="d-none" href="/account">Account</a>
+    </li>
+    <li class="menu-item">
       <a class="d-none" href="/dashboard" id="admin_link">Admin Dashboard</a>
     </li>
     <li class="menu-item">
@@ -128,14 +131,28 @@
               </div>
               <!-- Product type input -->
               <div class="form-group">
-                <label for="product-select">Product type:</label>
+                <label for="product-type-select">Product type:</label>
                 <select class="form-control" id="product-type-select">
                   <% for(let type of product_type) {%>
-                    <option value=<%=type%>><%=type%>
+                    <option value="<%=type%>">
+                      <%=type%>
                     </option>
                     <% } %>
                 </select>
               </div>
+
+              <div class="form-group">
+                <label for="product-catagory-select">Product type:</label>
+                <select class="form-control" id="product-catagory-select">
+                  <% for(let catagory of product_catagory) {%>
+                    <option value="<%=catagory%>">
+                      <%=catagory%>
+                    </option>
+                    <% } %>
+                </select>
+              </div>
+
+
               <!-- Product description input -->
               <!-- <div class="form-group my-3">
                 <label for="product-description">Product Description:</label>
@@ -183,6 +200,17 @@
                     <select class="form-control" id="new-product-type-select">
                       <% for(let type of product_type) {%>
                         <option value=<%=type%>><%=type%>
+                        </option>
+                        <% } %>
+                    </select>
+                  </div>
+                  <!-- Product catagory input -->
+                  <div class="form-group mb-3">
+                    <label for="product-select">Product type:</label>
+                    <select class="form-control" id="new-product-catagory-select">
+                      <% for(let catagory of product_catagory) {%>
+                        <option value="<%=catagory%>">
+                          <%=catagory%>
                         </option>
                         <% } %>
                     </select>
