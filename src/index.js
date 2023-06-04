@@ -23,12 +23,9 @@ const chat_route = require("./routes/gptRoute");
 const product_route = require("./routes/productRoutes");
 const payment_info_route = require("./routes/paymentInfoRoutes")
 const patient_info_route = require("./routes/patientInfoRoutes");
-const appointment_route=require("./routes/appointment")
+const appointment_route = require("./routes/appointment")
 const meal_route = require("./routes/mealRoute");
-const fitness_route=require("./routes/fitnessPlan")
-// const shipping_route = require("./routes/shippingRoutes");
-// const brand_route = require("./routes/brandRoutes");
-// const category_route = require("./routes/categoryRoutes");
+const fitness_route = require("./routes/fitnessPlan")
 const { addInitialProduct } = require('./helper/initial_product')
 const { googlePassport } = require("./auth/google");
 const Relation = require("./models/relation.model");
@@ -44,8 +41,6 @@ var corsOptions = {
 };
 
 app.use(cors(corsOptions));
-// app.use(helmet());
-// app.use(logger("dev"));
 app.use(passport.initialize());
 googlePassport(passport);
 
@@ -54,7 +49,6 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.use("/node", express.static(path.join(__dirname, "../node_modules")));
 
 // Middleware
-// app.use(express.json());
 app.use((req, res, next) => {
   console.log(req.originalUrl)
   if (req.originalUrl === '/paymentwebhook') {
@@ -70,7 +64,6 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 // Routes
-// require("./routes/viewRoutes")(app);
 app.use(user_route);
 app.use(role_route);
 app.use(product_route);
@@ -84,12 +77,6 @@ app.use(meal_route);
 app.use(fitness_route);
 app.use(view_route);
 
-// UNUSED SHOP ROUTES FOR LATER
-// app.use(payment_route);
-// app.use(shipping_route);
-// app.use(category_route);
-// app.use(brand_route);
-// app.use(product_size_route);
 Relation();
 
 // Handle unauthorized requests
